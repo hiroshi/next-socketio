@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
 
 export default function Page() {
+  const inputRef = useRef(null);
   const [message, setMessage] = useState('');
   const [socket, setSocket] = useState();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("emit message")
-    socket.emit('clientMessage', 'Hello, server!');
+    const message = inputRef.current.value;
+    socket.emit('clientMessage', message);
   };
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function Page() {
     <div>
       <h1>Hello, Next.js!</h1>
       <form onSubmit={handleSubmit}>
-        <input type="text" />
+        <input type="text" ref={inputRef} />
       </form>
     </div>
   );
