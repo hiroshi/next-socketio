@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const httpServer = res.socket.server;
     const io = new Server(httpServer);
     io.on('connection', (socket) => {
-      console.log('Client connected');
+      console.log(`Client connected: ${socket.id}`);
       socket.emit('serverMessage', 'hello');
 
       socket.onAny((event, message) => {
