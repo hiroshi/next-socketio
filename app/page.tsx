@@ -2,6 +2,29 @@
 
 import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
+import { SessionProvider } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
+
+function CurrentUser() {
+  const { data: session, status } = useSession();
+  console.log("status:", status);
+  console.log("session:", session);
+
+  if (session) {
+    return (
+      <>
+        email: {session.user.email}<br/>
+        <button onClick={signOut}>Sign out</button>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <button onClick={signIn}>Sign in</button>
+      </>
+    );
+  }
+}
 
 export default function Page() {
   const inputRef = useRef(null);
@@ -28,11 +51,12 @@ export default function Page() {
 
 
   return (
-    <div>
+    <SessionProvider>
       <h1>Hello, Next.js!</h1>
+      <CurrentUser />
       <form onSubmit={handleSubmit}>
         <input type="text" ref={inputRef} />
       </form>
-    </div>
+    </SessionProvider>
   );
 }
