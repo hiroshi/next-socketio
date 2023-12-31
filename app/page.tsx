@@ -7,8 +7,6 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 function CurrentUser() {
   const { data: session, status } = useSession();
-  console.log("status:", status);
-  console.log("session:", session);
 
   if (session) {
     return (
@@ -49,6 +47,12 @@ export default function Page() {
     };
   }, []);
 
+  // useEffect(() => {
+  //   fetch(""
+  // });
+  fetch("/api/topics").then(r => r.json()).then(topics => {
+    console.log(topics);
+  });
 
   return (
     <SessionProvider>
