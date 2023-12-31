@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
-import { MongoClient, ServerApiVersion } from 'mongodb';
-const serverApi = ServerApiVersion.v1;
+import mongoClientPromise from '../../../lib/mongo'
 
 export async function GET(request: Request) {
-  if (!global.mongoClientPromise) {
-    const client = new MongoClient('mongodb://mongo:27017/', { serverApi } )
-    // console.log("mongoClient: ", client);
-    global.mongoClientPromise = client.connect();
-  }
-  const client = await global.mongoClientPromise;
-  const collection = client.db('topics').collection('topics');
-  return NextResponse.json(await collection.find().toArray());
+  const mongoClient = await mongoClientPromise;
+  const topics = mongoClient.db('topics').collection('topics');
+  return NextResponse.json(await topics.find().toArray());
 }
 
