@@ -7,11 +7,11 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 function CurrentUser() {
   const { data: session, status } = useSession();
-
   if (session) {
     return (
       <>
-        email: {session.user.email}<br/>
+        <img src={ session.user.image } width="32" />
+        {session.user.email}<br/>
         <button onClick={signOut}>Sign out</button>
       </>
     );
@@ -22,6 +22,36 @@ function CurrentUser() {
       </>
     );
   }
+}
+
+function Topics() {
+  const [topics, setTopics] = useState([]);
+
+  useEffect(() => {
+    fetch(`/api/topics`).then(r => r.json()).then(topics => {
+      console.log(topics);
+      setTopics(topics);
+    });
+  }, []);
+
+  const list = topics.map(topic => {
+    return (
+      <div key={topic._id}>
+        <img src={topic.user_image} width="16" />
+        {topic.title}
+      </div>
+    );
+  });
+
+  return (
+    <div>
+      <form>
+      </form>
+      <div>
+        { list }
+      </div>
+    </div>
+  );
 }
 
 export default function Page() {
@@ -47,16 +77,11 @@ export default function Page() {
     };
   }, []);
 
-  useEffect(() => {
-    fetch(`/api/topics`).then(r => r.json()).then(topics => {
-      console.log(topics);
-    });
-  });
-
   return (
     <SessionProvider>
       <h1>Hello, Next.js!</h1>
       <CurrentUser />
+      <Topics />
       <form onSubmit={handleSubmit}>
         <input type="text" ref={inputRef} />
       </form>

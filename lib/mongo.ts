@@ -1,8 +1,9 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
-const serverApi = ServerApiVersion.v1;
 
 if (!global.mongoClien) {
+  const serverApi = ServerApiVersion.v1;
   const client = new MongoClient('mongodb://mongo:27017/', { serverApi } )
   global.mongoClient = await client.connect();
 }
-export default global.mongoClient;
+const db = global.mongoClient.db('topics');
+export default db;
