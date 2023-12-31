@@ -47,11 +47,10 @@ export default function Page() {
     };
   }, []);
 
-  // useEffect(() => {
-  //   fetch(""
-  // });
-  fetch("/api/topics").then(r => r.json()).then(topics => {
-    console.log(topics);
+  useEffect(() => {
+    fetch(`/api/topics`).then(r => r.json()).then(topics => {
+      console.log(topics);
+    });
   });
 
   return (
