@@ -5,6 +5,13 @@
 
 import type {Config} from 'jest';
 
+// https://nextjs.org/docs/app/building-your-application/testing/jest
+import nextJest from 'next/jest.js'
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  dir: './',
+})
+
 const config: Config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
@@ -195,5 +202,5 @@ const config: Config = {
   // Whether to use watchman for file crawling
   // watchman: true,
 };
-
-export default config;
+// createJestConfig(config)().then(conf => console.log(conf));
+export default createJestConfig(config);
