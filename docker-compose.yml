@@ -1,6 +1,7 @@
 services:
   app:
-    image: node:lts
+    # image: node:lts
+    build: ./
     command: npm run dev
     volumes:
       - .:/app
