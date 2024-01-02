@@ -34,12 +34,12 @@ function Topics() {
     });
   }, []);
 
-  const list = topics.map(topic => {
+  const items = topics.map(topic => {
     return (
-      <div key={topic._id}>
+      <li key={topic._id}>
         <img src={topic.user_image} width="16" />
         {topic.title}
-      </div>
+      </li>
     );
   });
 
@@ -47,9 +47,9 @@ function Topics() {
     <div>
       <form>
       </form>
-      <div>
-        { list }
-      </div>
+      <ul>
+        { items }
+      </ul>
     </div>
   );
 }
