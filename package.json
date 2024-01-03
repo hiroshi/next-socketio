@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@pact-foundation/pact": "^12.1.1",
     "mongodb": "^6.3.0",
     "next": "14.0.4",
     "next-auth": "^4.24.5",
