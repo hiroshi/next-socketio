@@ -1,8 +1,8 @@
-import '@testing-library/jest-dom'
-import { render, screen, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
-import Page from './page'
+import Page from './page';
 
 describe('Page', () => {
   it('renders a topic', async () => {
@@ -18,4 +18,4 @@ describe('Page', () => {
     // const heading = screen.getByRole('heading', { level: 1 })
     // expect(heading).toBeInTheDocument()
   })
-})
+});

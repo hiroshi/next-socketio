@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import db from '../../../../lib/mongo'
+import collection from '../../../../lib/mongo'
 
 const handler = NextAuth({
   providers: [
@@ -12,7 +12,7 @@ const handler = NextAuth({
   callbacks: {
     async signIn({ user }) {
       // console.log(user);
-      const users = db.collection('users');
+      const users = await collection('users');
       if (!await users.findOne({ id: user.id })) {
         users.insertOne(user);
       }
