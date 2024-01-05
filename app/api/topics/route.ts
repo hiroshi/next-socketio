@@ -5,7 +5,7 @@ async function GET(req: Request) {
   const Topic = await collection('topics');
   const User = await collection('users');
 
-  const topics = await Topic.find().toArray();
+  const topics = await Topic.find().sort({ _id: -1 }).toArray();
   for (var topic of topics) {
     const user = await User.findOne({_id: topic.user_id});
     if (user) {
