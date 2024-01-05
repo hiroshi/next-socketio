@@ -24,11 +24,32 @@ function CurrentUser() {
   }
 }
 
+function NewTopic() {
+  const inputRef = useRef(null);
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const message = inputRef.current.value;
+    const res = await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({message}),
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" ref={inputRef} />
+    </form>
+  );
+}
+
+
 function Topics() {
   const [topics, setTopics] = useState([]);
 
   useEffect(() => {
-    fetch(`/api/topics`).then(r => r.json()).then(topics => {
+    fetch('/api/topics').then(r => r.json()).then(topics => {
       console.log(topics);
       setTopics(topics);
     });
@@ -38,7 +59,7 @@ function Topics() {
     return (
       <li key={topic._id}>
         <img src={topic.user_image} width="16" />
-        {topic.title}
+        {topic.message}
       </li>
     );
   });
@@ -48,6 +69,9 @@ function Topics() {
       <form>
       </form>
       <ul>
+        <li>
+          <NewTopic />
+        </li>
         { items }
       </ul>
     </div>
@@ -79,9 +103,11 @@ export default function Page() {
 
   return (
     <SessionProvider>
-      <h1>Hello, Next.js!</h1>
       <CurrentUser />
+      <hr/>
       <Topics />
+      <hr/>
+      socket.io test
       <form onSubmit={handleSubmit}>
         <input type="text" ref={inputRef} />
       </form>

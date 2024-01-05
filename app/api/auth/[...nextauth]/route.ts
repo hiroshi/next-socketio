@@ -14,8 +14,11 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       console.log('signin:', { user });
       const User = await collection('users');
-      if (!await User.findOne({ id: user.id })) {
-        User.insertOne(user);
+      const uid = user.id;
+      if (!await User.findOne({ uid })) {
+        const newUser = { ...user, uid };
+        delete newUser['id'];
+        await User.insertOne(newUser);
       }
       return true;
     },
