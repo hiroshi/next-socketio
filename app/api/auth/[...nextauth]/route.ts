@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import collection from '../../../../lib/mongo'
+import { collection } from '../../../../lib/mongo'
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -11,14 +12,22 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn({ user }) {
-      // console.log(user);
-      const users = await collection('users');
-      if (!await users.findOne({ id: user.id })) {
-        users.insertOne(user);
+      console.log('signin:', { user });
+      const User = await collection('users');
+      if (!await User.findOne({ id: user.id })) {
+        User.insertOne(user);
       }
       return true;
-    }
+    },
+    async session({ session, token, user }) {
+      // console.log('session:', { session, token, user });
+      // https://stackoverflow.com/a/71721634/338986
+      session.user.id = token.sub
+      return session;
+    },
   }
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
