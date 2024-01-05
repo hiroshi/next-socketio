@@ -24,7 +24,7 @@ function CurrentUser() {
   }
 }
 
-function NewTopic() {
+function NewTopic({ setUpdate }) {
   const inputRef = useRef(null);
   const [message, setMessage] = useState('');
 
@@ -35,6 +35,7 @@ function NewTopic() {
       method: 'POST',
       body: JSON.stringify({message}),
     });
+    setUpdate(new Date());
   };
 
   return (
@@ -46,6 +47,7 @@ function NewTopic() {
 
 
 function Topics() {
+  const [update, setUpdate] = useState(new Date());
   const [topics, setTopics] = useState([]);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ function Topics() {
       console.log(topics);
       setTopics(topics);
     });
-  }, []);
+  }, [update]);
 
   const items = topics.map(topic => {
     return (
@@ -64,13 +66,14 @@ function Topics() {
     );
   });
 
+  const newTopicsProps = { setUpdate };
   return (
     <div>
       <form>
       </form>
       <ul>
         <li>
-          <NewTopic />
+          <NewTopic {...newTopicsProps}/>
         </li>
         { items }
       </ul>
