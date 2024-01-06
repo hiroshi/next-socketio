@@ -35,6 +35,7 @@ function NewTopic({ setUpdate }) {
       method: 'POST',
       body: JSON.stringify({message}),
     });
+    e.target.reset();
     setUpdate(new Date());
   };
 
