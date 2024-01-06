@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { collection } from '../../../lib/mongo';
+import { io } from '../../../lib/io';
 
-async function GET(req: Request) {
+async function topics() {
   const Topic = await collection('topics');
   const User = await collection('users');
 
@@ -12,7 +13,11 @@ async function GET(req: Request) {
       topic.user_image = user.image;
     }
   }
-  return NextResponse.json(topics);
+  return topics;
+}
+
+async function GET(req: Request) {
+  return NextResponse.json(await topics());
 }
 
 import { getServerSession } from "next-auth";
@@ -29,6 +34,8 @@ async function POST(req: Request) {
   const user = await User.findOne({ uid });
   const user_id = user._id;
   await Topic.insertOne({ ...topic, user_id });
+
+  io().emit('topics', await topics())
 
   return new Response('', { status: 201 });
 }
