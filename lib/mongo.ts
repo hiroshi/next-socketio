@@ -10,7 +10,7 @@ declare global {
 const collection = async (collection: string) => {
   if (!global.mongoClient) {
     const serverApi = ServerApiVersion.v1;
-    global.mongoClient = new MongoClient('mongodb://mongo:27017/', { serverApi } )
+    global.mongoClient = new MongoClient(process.env.MONGODB_URI!, { serverApi } )
   }
   const conn = await global.mongoClient.connect();
   return conn.db('topics').collection(collection);
