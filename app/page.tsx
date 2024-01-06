@@ -69,9 +69,10 @@ function Topics() {
   }, []);
 
   const items = topics.map(topic => {
+    const user = topic.user
     return (
       <li key={topic._id}>
-        <img src={topic.user_image} width="16" />
+        <img src={user.image} width="16" title={user.email} alt={user.email} />
         {topic.message}
       </li>
     );

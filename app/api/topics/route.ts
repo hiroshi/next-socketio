@@ -10,7 +10,7 @@ async function topics() {
   for (var topic of topics) {
     const user = await User.findOne({_id: topic.user_id});
     if (user) {
-      topic.user_image = user.image;
+      topic.user = user;
     }
   }
   return topics;
