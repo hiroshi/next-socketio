@@ -5,37 +5,39 @@ import io from 'socket.io-client';
 import { SessionProvider } from "next-auth/react";
 import { useSession, signIn, signOut } from "next-auth/react";
 
+import { Topic } from '../types';
+
 function CurrentUser() {
   const { data: session, status } = useSession();
   if (session) {
     return (
       <>
-        <img src={ session.user.image } width="32" />
-        {session.user.email}<br/>
-        <button onClick={signOut}>Sign out</button>
+        <img src={ session?.user?.image || undefined } width="32" />
+        {session?.user?.email}<br/>
+        <button onClick={ () => signOut() }>Sign out</button>
       </>
     );
   } else {
     return (
       <>
-        <button onClick={signIn}>Sign in</button>
+        <button onClick={ () => signIn() }>Sign in</button>
       </>
     );
   }
 }
 
-function NewTopic({ setUpdate }) {
-  const inputRef = useRef(null);
+function NewTopic({ setUpdate } : {setUpdate: (v: any) => void}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const message = inputRef.current.value;
+    const message = inputRef?.current?.value;
     const res = await fetch('/api/topics', {
       method: 'POST',
       body: JSON.stringify({message}),
     });
-    e.target.reset();
+    (e.target as HTMLFormElement).reset();
     setUpdate(new Date());
   };
 
@@ -68,7 +70,7 @@ function Topics() {
     socket.on('topics', setTopics);
   }, []);
 
-  const items = topics.map(topic => {
+  const items = topics.map((topic: Topic) => {
     const user = topic.user
     return (
       <li key={topic._id}>

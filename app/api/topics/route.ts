@@ -21,18 +21,18 @@ async function GET(req: Request) {
 }
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import authOptions  from "../auth/[...nextauth]/authOptions";
 
 async function POST(req: Request) {
   const topic = await req.json();
   const Topic = await collection('topics');
   const User = await collection('users');
 
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions) as any;;
   // console.log('POST /api/topics', { session });
-  const uid = session.user.id;
+  const uid = session?.user?.id;
   const user = await User.findOne({ uid });
-  const user_id = user._id;
+  const user_id = user?._id;
   await Topic.insertOne({ ...topic, user_id });
 
   io().emit('topics', await topics())
