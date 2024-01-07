@@ -26,16 +26,22 @@ function CurrentUser() {
   }
 }
 
-function NewTopic({ setUpdate } : {setUpdate: (v: any) => void}) {
+type NewTopicProps = {
+  setUpdate: (v: any) => void,
+  parent: Topic,
+};
+
+function NewTopic({ setUpdate, parent } : NewTopicProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const message = inputRef?.current?.value;
+    const parent_id = parent?._id;
     const res = await fetch('/api/topics', {
       method: 'POST',
-      body: JSON.stringify({message}),
+      body: JSON.stringify({ message, parent_id }),
     });
     (e.target as HTMLFormElement).reset();
     setUpdate(new Date());
@@ -48,39 +54,58 @@ function NewTopic({ setUpdate } : {setUpdate: (v: any) => void}) {
   );
 }
 
-function Topics() {
+function TopicItem({ topic }: { topic: Topic }) {
+  const [focus, setFocus] = useState(false);
+
+  const handleClick = (e) => {
+    setFocus(true);
+  };
+
+  const user = topic.user;
+  return (
+    <div className={'topic-item'} onClick={handleClick}>
+      <img src={user.image} width="16" title={user.email} alt={user.email} />
+      {topic.message}
+      { focus && (
+        <TopicsList parent={topic} />
+      )}
+    </div>
+  );
+}
+
+function TopicsList({ parent }: { parent: Topic }) {
   const [update, setUpdate] = useState(new Date());
   const [topics, setTopics] = useState([]);
 
   useEffect(() => {
-    fetch('/api/topics').then(r => r.json()).then(topics => {
+    let queryString = '';
+    if (parent) {
+      queryString = new URLSearchParams({ parent_id: parent?._id || null }).toString();
+    }
+    fetch(`/api/topics?${queryString}`).then(r => r.json()).then(topics => {
       setTopics(topics);
     });
   }, [update]);
 
-  useEffect(() => {
-    const socket = io();
-    socket.on('connect_error', (error) => {
-      console.log('socket connect_error:', error);
-      fetch('/api/socket');
-    });
-    // socket.onAny((event, ...args) => {
-    //   console.log('socket.onAny:', { event, args })
-    // });
-    socket.on('topics', setTopics);
-  }, []);
+  if (!parent) {
+    // useEffect(() => {
+    //   const socket = io();
+    //   socket.on('connect_error', (error) => {
+    //     console.log('socket connect_error:', error);
+    //     fetch('/api/socket');
+    //   });
+    //   // socket.onAny((event, ...args) => {
+    //   //   console.log('socket.onAny:', { event, args })
+    //   // });
+    //   socket.on('topics', setTopics);
+    // }, []);
+  }
 
   const items = topics.map((topic: Topic) => {
-    const user = topic.user
-    return (
-      <li key={topic._id}>
-        <img src={user.image} width="16" title={user.email} alt={user.email} />
-        {topic.message}
-      </li>
-    );
+    return (<li key={topic._id}><TopicItem topic={topic} /></li>);
   });
 
-  const newTopicsProps = { setUpdate };
+  const newTopicsProps: NewTopicProps = { setUpdate, parent };
   return (
     <div>
       <form>
@@ -96,39 +121,11 @@ function Topics() {
 }
 
 export default function Page() {
-  const inputRef = useRef(null);
-  const [message, setMessage] = useState('');
-  const [socket, setSocket] = useState();
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const message = inputRef.current.value;
-  //   socket.emit('clientMessage', message);
-  // };
-
-  // useEffect(() => {
-  //   fetch('/api/socket').then(() => {
-  //     const sock = io();
-  //     setSocket(sock);
-  //   });
-
-  //   return () => {
-  //     if (socket !== undefined) {
-  //       socket.disconnect();
-  //     }
-  //   };
-  // }, []);
-
-      // <hr/>
-      // socket.io test
-      // <form onSubmit={handleSubmit}>
-      //   <input type="text" ref={inputRef} />
-      // </form>
-
   return (
     <SessionProvider>
       <CurrentUser />
       <hr/>
-      <Topics />
+      <TopicsList parent={null} />
     </SessionProvider>
   );
 }

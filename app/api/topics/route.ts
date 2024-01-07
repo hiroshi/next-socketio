@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { collection } from '../../../lib/mongo';
 import { io } from '../../../lib/io';
+import { ObjectId } from 'mongodb';
 
-async function topics() {
+async function topics(query) {
   const Topic = await collection('topics');
   const User = await collection('users');
 
-  const topics = await Topic.find().sort({ _id: -1 }).toArray();
+  const topics = await Topic.find(query).sort({ _id: -1 }).toArray();
   for (var topic of topics) {
     const user = await User.findOne({_id: topic.user_id});
     if (user) {
@@ -17,14 +18,21 @@ async function topics() {
 }
 
 async function GET(req: Request) {
-  return NextResponse.json(await topics());
+  // const { parent_id } = await req.json();
+  const searchParams = req.nextUrl.searchParams;
+  const parent_id = searchParams.get('parent_id');
+  console.log({parent_id});
+  const query = {
+    parent_id: parent_id ? new ObjectId(parent_id) : null,
+  };
+  return NextResponse.json(await topics(query));
 }
 
 import { getServerSession } from "next-auth";
-import authOptions  from "../auth/[...nextauth]/authOptions";
+import authOptions from "../auth/[...nextauth]/authOptions";
 
 async function POST(req: Request) {
-  const topic = await req.json();
+  const { message, parent_id } = await req.json();
   const Topic = await collection('topics');
   const User = await collection('users');
 
@@ -33,9 +41,13 @@ async function POST(req: Request) {
   const uid = session?.user?.id;
   const user = await User.findOne({ uid });
   const user_id = user?._id;
-  await Topic.insertOne({ ...topic, user_id });
+  const doc = { message, user_id };
+  if (parent_id) {
+    doc.parent_id = new ObjectId(parent_id);
+  }
+  await Topic.insertOne(doc);
 
-  io().emit('topics', await topics())
+  // io().emit('topics', await topics())
 
   return new Response('', { status: 201 });
 }

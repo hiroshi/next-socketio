@@ -25,3 +25,7 @@ body {
   /*   ) */
   /*   rgb(var(--background-start-rgb)); */
 }
+
+.topic-item:hover {
+  background: lightblue;
+}
