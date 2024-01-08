@@ -41,4 +41,6 @@ body {
 .topic-id-clipboard {
   cursor: pointer;
 }
-
+span form {
+  display: inline;
+}

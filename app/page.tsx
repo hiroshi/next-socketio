@@ -136,7 +136,7 @@ function TopicsList({ parent }: { parent: Topic }) {
       </form>
       <ul>
         <li>
-          <NewTopic {...newTopicsProps}/> or <button onClick={handleClickSetParent}>Paste from 📋</button>
+          <span><NewTopic {...newTopicsProps}/> or <button onClick={handleClickSetParent}>Paste from 📋</button></span>
         </li>
         { items }
       </ul>
