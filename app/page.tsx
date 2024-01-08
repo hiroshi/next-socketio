@@ -84,7 +84,9 @@ function TopicItem({ topic }: { topic: Topic }) {
       <img src={user.image} width="16" title={user.email} alt={user.email} />
       {topic.message}
       <span className={'topic-action'}>
-        <button onClick={handleClickMove}>move</button>
+        { selectedTopic &&
+          <button onClick={handleClickMove}>move</button>
+        }
       </span>
       { focus && (
         <>
