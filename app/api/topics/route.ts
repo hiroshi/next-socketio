@@ -32,24 +32,29 @@ import { getServerSession } from "next-auth";
 import authOptions from "../auth/[...nextauth]/authOptions";
 
 async function POST(req: Request) {
-  const { message, parent_id } = await req.json();
+  const { _id, message, parent_id } = await req.json();
   const Topic = await collection('topics');
   const User = await collection('users');
 
-  const session = await getServerSession(authOptions) as any;;
-  // console.log('POST /api/topics', { session });
-  const uid = session?.user?.id;
-  const user = await User.findOne({ uid });
-  const user_id = user?._id;
-  const doc = { message, user_id };
-  if (parent_id) {
-    doc.parent_id = new ObjectId(parent_id);
+  if (_id) {
+    await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { parent_id: new ObjectId(parent_id) } });
+    return new Response(null, { status: 204 });
+  } else {
+    const session = await getServerSession(authOptions) as any;;
+    // console.log('POST /api/topics', { session });
+    const uid = session?.user?.id;
+    const user = await User.findOne({ uid });
+    const user_id = user?._id;
+    const doc = { message, user_id };
+    if (parent_id) {
+      doc.parent_id = new ObjectId(parent_id);
+    }
+    await Topic.insertOne(doc);
+
+    // io().emit('topics', await topics())
+
+    return new Response('', { status: 201 });
   }
-  await Topic.insertOne(doc);
-
-  // io().emit('topics', await topics())
-
-  return new Response('', { status: 201 });
 }
 
 export { GET, POST };

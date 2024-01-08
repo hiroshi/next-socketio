@@ -26,6 +26,19 @@ body {
   /*   rgb(var(--background-start-rgb)); */
 }
 
+/* topics */
 .topic-item:hover {
   background: lightblue;
 }
+.topic-id {
+  margin: 0 0.5em;
+  color: gray;
+  display: none;
+}
+.topic-item:hover > .topic-id {
+  display: inline;
+}
+.topic-id-clipboard {
+  cursor: pointer;
+}
+

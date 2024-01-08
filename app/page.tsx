@@ -39,7 +39,7 @@ function NewTopic({ setUpdate, parent } : NewTopicProps) {
     e.preventDefault();
     const message = inputRef?.current?.value;
     const parent_id = parent?._id;
-    const res = await fetch('/api/topics', {
+    await fetch('/api/topics', {
       method: 'POST',
       body: JSON.stringify({ message, parent_id }),
     });
@@ -56,9 +56,17 @@ function NewTopic({ setUpdate, parent } : NewTopicProps) {
 
 function TopicItem({ topic }: { topic: Topic }) {
   const [focus, setFocus] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleClick = (e) => {
     setFocus(true);
+  };
+
+  const handleClickId = async (e) => {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(topic._id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const user = topic.user;
@@ -66,8 +74,15 @@ function TopicItem({ topic }: { topic: Topic }) {
     <div className={'topic-item'} onClick={handleClick}>
       <img src={user.image} width="16" title={user.email} alt={user.email} />
       {topic.message}
+      <span className={'topic-id'}>
+        {topic._id}
+        <span className={'topic-id-clipboard'} onClick={handleClickId}>📋</span>
+        { copied && 'copied!' }
+      </span>
       { focus && (
-        <TopicsList parent={topic} />
+        <>
+          <TopicsList parent={topic} />
+        </>
       )}
     </div>
   );
@@ -86,6 +101,15 @@ function TopicsList({ parent }: { parent: Topic }) {
       setTopics(topics);
     });
   }, [update]);
+
+  const handleClickSetParent = async (e) => {
+    const chilld_id = await navigator.clipboard.readText();
+    await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({ parent_id: parent?._id || null, _id: chilld_id }),
+    });
+    setUpdate(new Date());
+  };
 
   if (!parent) {
     // useEffect(() => {
@@ -112,7 +136,7 @@ function TopicsList({ parent }: { parent: Topic }) {
       </form>
       <ul>
         <li>
-          <NewTopic {...newTopicsProps}/>
+          <NewTopic {...newTopicsProps}/> or <button onClick={handleClickSetParent}>Paste from 📋</button>
         </li>
         { items }
       </ul>
