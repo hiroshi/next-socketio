@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext, createContext } from 'react';
 import io from 'socket.io-client';
 import { SessionProvider } from "next-auth/react";
 import { useSession, signIn, signOut } from "next-auth/react";
 
 import { Topic } from '../types';
+
+export const SelectedTopicContext = createContext({
+  selectedTopic: null,
+  setSelectedTopic: () => {},
+});
 
 function CurrentUser() {
   const { data: session, status } = useSession();
@@ -57,16 +62,20 @@ function NewTopic({ setUpdate, parent } : NewTopicProps) {
 function TopicItem({ topic }: { topic: Topic }) {
   const [focus, setFocus] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { selectedTopic, setSelectedTopic } = useContext(SelectedTopicContext);
 
   const handleClick = (e) => {
     setFocus(true);
+    setSelectedTopic(topic);
   };
 
-  const handleClickId = async (e) => {
+  const handleClickMove = async (e) => {
     e.stopPropagation();
-    await navigator.clipboard.writeText(topic._id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({ parent_id: selectedTopic?._id || null, _id: topic._id }),
+    });
+    // setUpdate(new Date());
   };
 
   const user = topic.user;
@@ -74,10 +83,8 @@ function TopicItem({ topic }: { topic: Topic }) {
     <div className={'topic-item'} onClick={handleClick}>
       <img src={user.image} width="16" title={user.email} alt={user.email} />
       {topic.message}
-      <span className={'topic-id'}>
-        {topic._id}
-        <span className={'topic-id-clipboard'} onClick={handleClickId}>📋</span>
-        { copied && 'copied!' }
+      <span className={'topic-action'}>
+        <button onClick={handleClickMove}>move</button>
       </span>
       { focus && (
         <>
@@ -101,15 +108,6 @@ function TopicsList({ parent }: { parent: Topic }) {
       setTopics(topics);
     });
   }, [update]);
-
-  const handleClickSetParent = async (e) => {
-    const chilld_id = await navigator.clipboard.readText();
-    await fetch('/api/topics', {
-      method: 'POST',
-      body: JSON.stringify({ parent_id: parent?._id || null, _id: chilld_id }),
-    });
-    setUpdate(new Date());
-  };
 
   if (!parent) {
     // useEffect(() => {
@@ -136,7 +134,7 @@ function TopicsList({ parent }: { parent: Topic }) {
       </form>
       <ul>
         <li>
-          <span><NewTopic {...newTopicsProps}/> or <button onClick={handleClickSetParent}>Paste from 📋</button></span>
+          <span><NewTopic {...newTopicsProps}/></span>
         </li>
         { items }
       </ul>
@@ -145,11 +143,16 @@ function TopicsList({ parent }: { parent: Topic }) {
 }
 
 export default function Page() {
+  const [selectedTopic, setSelectedTopic] = useState(null);
+
   return (
     <SessionProvider>
       <CurrentUser />
       <hr/>
-      <TopicsList parent={null} />
+      <SelectedTopicContext.Provider value={{ selectedTopic, setSelectedTopic }}>
+        { `selectedTopic._id: ${selectedTopic?._id}` }
+        <TopicsList parent={null} />
+      </SelectedTopicContext.Provider>
     </SessionProvider>
   );
 }

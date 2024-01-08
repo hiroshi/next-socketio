@@ -30,12 +30,12 @@ body {
 .topic-item:hover {
   background: lightblue;
 }
-.topic-id {
+.topic-action {
   margin: 0 0.5em;
   color: gray;
   display: none;
 }
-.topic-item:hover > .topic-id {
+.topic-item:hover > .topic-action {
   display: inline;
 }
 .topic-id-clipboard {
