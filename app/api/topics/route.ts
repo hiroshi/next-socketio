@@ -21,7 +21,7 @@ async function GET(req: Request) {
   // const { parent_id } = await req.json();
   const searchParams = req.nextUrl.searchParams;
   const parent_id = searchParams.get('parent_id');
-  console.log({parent_id});
+  // console.log({parent_id});
   const query = {
     parent_id: parent_id ? new ObjectId(parent_id) : null,
   };
@@ -32,7 +32,9 @@ import { getServerSession } from "next-auth";
 import authOptions from "../auth/[...nextauth]/authOptions";
 
 async function POST(req: Request) {
-  const { _id, message, parent_id } = await req.json();
+  const params = await req.json();
+  console.log('POST /api/topics', params);
+  const { _id, message, parent_id } = params;
   const Topic = await collection('topics');
   const User = await collection('users');
 
