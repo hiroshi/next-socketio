@@ -44,3 +44,7 @@ body {
 span form {
   display: inline;
 }
+
+.topic-selected {
+  border: solid gray 1px;
+}
