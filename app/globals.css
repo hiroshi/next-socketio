@@ -44,15 +44,21 @@ body {
 span form {
   display: inline;
 }
-
-.topic-labels-form {
-  display: inline;
-  margin: 0 0.5em;
+/* TopicView */
+.topic-item {
+  height: 22px;
+  margin: 1px;
+  padding: 1px;
+  border: solid transparent 1px;
 }
 .topic-selected {
   border: solid gray 1px;
 }
+.topic-labels-form {
+   margin: 0 0.5em;
+}
 .topic-label {
   border: solid gray 1px;
+  padding: 0 0.2em;
   margin-left: 0.5em;
 }

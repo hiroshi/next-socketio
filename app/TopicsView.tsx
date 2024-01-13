@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react';
+import classNames from 'classnames';
 
 type NewTopicProps = {
   setUpdate: (v: any) => void,
@@ -29,15 +30,12 @@ function NewTopic({ setUpdate } : NewTopicProps) {
 }
 
 function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
-  const [labels, setLabels] = useState(topic.labels);
+  const initialLabelsString = topic.labels ? topic.labels.map((o) => Object.entries(o)[0].join(':')).join(' ') : '';
+
+  const [labelsString, setLabelsString] = useState(initialLabelsString);
 
   const handleChangeLabels = (e) => {
-    const labels = e.target.value.split(/\s+/).map((pair) => {
-      const [k, v] = pair.split(':');
-      return {[k]: v};
-    });
-    console.log(JSON.stringify(labels));
-    setLabels(labels);
+    setLabelsString(e.target.value);
   };
 
   const handleSubmitLabels = async (e) => {
@@ -50,16 +48,26 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
     setUpdate(new Date());
   };
 
+  const labels = [];
+  labelsString.split(/\s+/).forEach((pair) => {
+    const [k, v] = pair.split(':');
+    if (k && v) {
+      labels.push({[k]: v});
+    }
+  });
+
   return (
-    <div className='topic-selected'>
+    <div className={classNames({'topic-item': true, 'topic-selected': selected})}>
       {topic.message}
       {
         labels.map((o, i) => <span key={i} className='topic-label'>{Object.entries(o)[0].join(':')}</span>)
       }
       { selected &&
-        <form onSubmit={handleSubmitLabels}className='topic-labels-form'>
-          <input type='text' onChange={handleChangeLabels} />
-        </form>
+        <span>
+          <form onSubmit={handleSubmitLabels}className='topic-labels-form'>
+            <input type='text' value={labelsString} onChange={handleChangeLabels} />
+          </form>
+        </span>
       }
     </div>
   );
@@ -72,7 +80,7 @@ export default function TopicsView() {
   const listRef = useRef(null);
 
   useEffect(() => {
-    fetch('/api/topics?limit=1').then(r => r.json()).then(topics => {
+    fetch('/api/topics?limit=3').then(r => r.json()).then(topics => {
       setTopics(topics);
     });
   }, [update]);
