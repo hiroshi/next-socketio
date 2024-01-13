@@ -45,6 +45,14 @@ span form {
   display: inline;
 }
 
+.topic-labels-form {
+  display: inline;
+  margin: 0 0.5em;
+}
 .topic-selected {
   border: solid gray 1px;
+}
+.topic-label {
+  border: solid gray 1px;
+  margin-left: 0.5em;
 }

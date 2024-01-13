@@ -28,9 +28,40 @@ function NewTopic({ setUpdate } : NewTopicProps) {
   );
 }
 
-function TopicItem({ topic, selected }: { topic: Topic, selected: bool }) {
+function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
+  const [labels, setLabels] = useState(topic.labels);
+
+  const handleChangeLabels = (e) => {
+    const labels = e.target.value.split(/\s+/).map((pair) => {
+      const [k, v] = pair.split(':');
+      return {[k]: v};
+    });
+    console.log(JSON.stringify(labels));
+    setLabels(labels);
+  };
+
+  const handleSubmitLabels = async (e) => {
+    e.preventDefault();
+    await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({ _id: topic._id, labels }),
+    });
+    (e.target as HTMLFormElement).reset();
+    setUpdate(new Date());
+  };
+
   return (
-    <div className={selected && 'topic-selected'}>{topic.message}</div>
+    <div className='topic-selected'>
+      {topic.message}
+      {
+        labels.map((o, i) => <span key={i} className='topic-label'>{Object.entries(o)[0].join(':')}</span>)
+      }
+      { selected &&
+        <form onSubmit={handleSubmitLabels}className='topic-labels-form'>
+          <input type='text' onChange={handleChangeLabels} />
+        </form>
+      }
+    </div>
   );
 }
 
@@ -63,6 +94,7 @@ export default function TopicsView() {
     const props = {
       topic: topic,
       selected: selectedTopicId === topic._id,
+      setUpdate,
     }
     return (<li key={topic._id} onClick={()=>setSelectedTopicId(topic._id)}><TopicItem {...props} /></li>);
   });

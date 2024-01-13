@@ -36,12 +36,13 @@ import authOptions from "../auth/[...nextauth]/authOptions";
 async function POST(req: Request) {
   const params = await req.json();
   console.log('POST /api/topics:', params);
-  const { _id, message, parent_id } = params;
+  const { _id, message, parent_id, labels } = params;
   const Topic = await collection('topics');
   const User = await collection('users');
 
   if (_id) {
-    await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { parent_id: new ObjectId(parent_id) } });
+    // await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { parent_id: new ObjectId(parent_id) } });
+    await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { labels: labels } });
     return new Response(null, { status: 204 });
   } else {
     const session = await getServerSession(authOptions) as any;;
