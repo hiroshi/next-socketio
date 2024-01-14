@@ -3,6 +3,24 @@
 import { useEffect, useState, useRef } from 'react';
 import classNames from 'classnames';
 
+function Filter() {
+  const [filterString, setFilterString] = useState('');
+
+  const handleChange = async (event) => {
+    const value = event.target.value
+    setFilterString(value);
+    // console.log(value);
+    const results = await fetch(`/api/labels?q=${value}`).then(r => r.json())
+    console.log(results);
+  };
+
+  return (
+    <form>
+      <input type='text' value={filterString} onChange={handleChange} />
+    </form>
+  );
+}
+
 type NewTopicProps = {
   setUpdate: (v: any) => void,
 };
@@ -30,7 +48,7 @@ function NewTopic({ setUpdate } : NewTopicProps) {
 }
 
 function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
-  const initialLabelsString = topic.labels ? topic.labels.map((o) => Object.entries(o)[0].join(':')).join(' ') : '';
+  const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
 
   const [labelsString, setLabelsString] = useState(initialLabelsString);
 
@@ -44,7 +62,8 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
       method: 'POST',
       body: JSON.stringify({ _id: topic._id, labels }),
     });
-    (e.target as HTMLFormElement).reset();
+    console.log(labels);
+    // (e.target as HTMLFormElement).reset();
     setUpdate(new Date());
   };
 
@@ -52,7 +71,7 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
   labelsString.split(/\s+/).forEach((pair) => {
     const [k, v] = pair.split(':');
     if (k && v) {
-      labels.push({[k]: v});
+      labels.push({k,v});
     }
   });
 
@@ -60,11 +79,11 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
     <div className={classNames({'topic-item': true, 'topic-selected': selected})}>
       {topic.message}
       {
-        labels.map((o, i) => <span key={i} className='topic-label'>{Object.entries(o)[0].join(':')}</span>)
+        labels.map((o, i) => <span key={i} className='topic-label'>{`${o.k}:${o.v}`}</span>)
       }
       { selected &&
         <span>
-          <form onSubmit={handleSubmitLabels}className='topic-labels-form'>
+          <form onSubmit={handleSubmitLabels} className='topic-labels-form'>
             <input type='text' value={labelsString} onChange={handleChangeLabels} />
           </form>
         </span>
@@ -110,9 +129,7 @@ export default function TopicsView() {
   const newTopicsProps: NewTopicProps = { setUpdate };
   return (
     <div>
-      <form>
-        <input type='text' />
-      </form>
+      <Filter />
       <ul ref={listRef}>
         <li>
           <NewTopic {...newTopicsProps} />
