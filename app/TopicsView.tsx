@@ -1,7 +1,12 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext, createContext } from 'react';
 import classNames from 'classnames';
+
+const ViewContext = createContext({
+  updateView: () => {},
+  setSelectedTopicId: () => {},
+});
 
 function Filter() {
   const [filterString, setFilterString] = useState('');
@@ -49,8 +54,8 @@ function NewTopic({ setUpdate } : NewTopicProps) {
 
 function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
   const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
-
   const [labelsString, setLabelsString] = useState(initialLabelsString);
+  const { updateView, setSelectedTopicId } = useContext(ViewContext);
 
   const handleChangeLabels = (e) => {
     setLabelsString(e.target.value);
@@ -64,7 +69,9 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
     });
     console.log(labels);
     // (e.target as HTMLFormElement).reset();
-    setUpdate(new Date());
+    // setUpdate(new Date());
+    updateView();
+    setSelectedTopicId(null);
   };
 
   const labels = [];
@@ -95,7 +102,7 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
 export default function TopicsView() {
   const [update, setUpdate] = useState(new Date());
   const [topics, setTopics] = useState([]);
-  const [selectedTopicId, setSelectedTopicId] = useState(new Date());
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -127,8 +134,14 @@ export default function TopicsView() {
   });
 
   const newTopicsProps: NewTopicProps = { setUpdate };
+
+  const context = {
+    updateView: () => setUpdate(new Date()),
+    setSelectedTopicId,
+  }
+
   return (
-    <div>
+    <ViewContext.Provider value={context}>
       <Filter />
       <ul ref={listRef}>
         <li>
@@ -136,6 +149,6 @@ export default function TopicsView() {
         </li>
         { items }
       </ul>
-    </div>
+    </ViewContext.Provider>
   );
 }
