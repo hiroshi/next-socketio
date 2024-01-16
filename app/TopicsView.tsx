@@ -10,18 +10,42 @@ const ViewContext = createContext({
 
 function Filter() {
   const [filterString, setFilterString] = useState('');
+  const [labels, setLabels] = useState([]);
+  const [focusLabel, setFocusLabel] = useState(null);
+  const inputRef = useRef(null);
 
   const handleChange = async (event) => {
     const value = event.target.value
     setFilterString(value);
     // console.log(value);
     const results = await fetch(`/api/labels?q=${value}`).then(r => r.json())
-    console.log(results);
+    // console.log(results);
+    setLabels(results);
   };
 
+  const handleFocus = (event) => {
+    const label = event.target.value;
+    // console.log('focus:', label);
+    setFocusLabel(label);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // console.log('submit:', focusLabel);
+    setFilterString(focusLabel + ':');
+    inputRef.current.focus();
+  };
+
+  const options = labels.map((label) => {
+    return (
+      <button key={ label } value={ label } onFocus={handleFocus}>{ label }:</button>
+    );
+  });
+
   return (
-    <form>
-      <input type='text' value={filterString} onChange={handleChange} />
+    <form onSubmit={handleSubmit}>
+      <input ref={inputRef} type='text' value={filterString} onChange={handleChange} />
+      { options }
     </form>
   );
 }
