@@ -14,32 +14,42 @@ function Filter() {
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
 
+  useEffect(() => {
+    fetch(`/api/labels?q=${filterString}`).then(r => r.json()).then((results) => {
+      console.log('results:', results);
+      setLabels(results);
+    });
+  }, [filterString]);
+
   const handleChange = async (event) => {
     const value = event.target.value
     setFilterString(value);
     // console.log(value);
-    const results = await fetch(`/api/labels?q=${value}`).then(r => r.json())
-    // console.log(results);
-    setLabels(results);
   };
 
   const handleFocus = (event) => {
-    const label = event.target.value;
+    const value = event.target.value;
     // console.log('focus:', label);
-    setFocusLabel(label);
+    const [k, v] = value.split(':');
+    setFocusLabel({k, v});
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     // console.log('submit:', focusLabel);
-    setFilterString(focusLabel + ':');
+    // setFilterString(focusLabel + ':');
+    const {k, v} = focusLabel;
+    if (v !== undefined) {
+      setFilterString(`${k}:${v}`);
+    } else {
+      setFilterString(`${k}:`);
+    }
     inputRef.current.focus();
   };
 
-  const options = labels.map((label) => {
-    return (
-      <button key={ label } value={ label } onFocus={handleFocus}>{ label }:</button>
-    );
+  const options = labels.map(({k, v}) => {
+    const label = v !== undefined ? `${k}:${v}` : `${k}:`
+    return (<button key={ label } value={ label } onFocus={handleFocus}>{ label }</button>);
   });
 
   return (
