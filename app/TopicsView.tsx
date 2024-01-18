@@ -8,7 +8,7 @@ const ViewContext = createContext({
   setSelectedTopicId: () => {},
 });
 
-function Filter() {
+function Filter({ setQuery }) {
   const [filterString, setFilterString] = useState('');
   const [labels, setLabels] = useState([]);
   const [focusLabel, setFocusLabel] = useState(null);
@@ -29,18 +29,21 @@ function Filter() {
 
   const handleFocus = (event) => {
     const value = event.target.value;
-    // console.log('focus:', label);
-    const [k, v] = value.split(':');
+    const [k, _v] = value.split(':');
+    const v = _v !== '' ? _v : undefined;
+    // console.log('handleFocus:', [k, v !== '' ? v : null]);
     setFocusLabel({k, v});
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // console.log('submit:', focusLabel);
+    console.log('submit:', focusLabel);
     // setFilterString(focusLabel + ':');
     const {k, v} = focusLabel;
     if (v !== undefined) {
-      setFilterString(`${k}:${v}`);
+      const filterString = `${k}:${v}`;
+      setFilterString(filterString);
+      setQuery(filterString);
     } else {
       setFilterString(`${k}:`);
     }
@@ -137,13 +140,14 @@ export default function TopicsView() {
   const [update, setUpdate] = useState(new Date());
   const [topics, setTopics] = useState([]);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const [query, setQuery] = useState('');
   const listRef = useRef(null);
 
   useEffect(() => {
-    fetch('/api/topics?limit=3').then(r => r.json()).then(topics => {
+    fetch(`/api/topics?limit=3&q=${query}`).then(r => r.json()).then(topics => {
       setTopics(topics);
     });
-  }, [update]);
+  }, [update, query]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -174,9 +178,10 @@ export default function TopicsView() {
     setSelectedTopicId,
   }
 
+  const filterProps = { setQuery };
   return (
     <ViewContext.Provider value={context}>
-      <Filter />
+      <Filter {...filterProps}/>
       <ul ref={listRef}>
         <li>
           <NewTopic {...newTopicsProps} />

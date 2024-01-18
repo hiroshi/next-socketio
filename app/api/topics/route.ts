@@ -7,6 +7,7 @@ async function topics(query, limit) {
   const Topic = await collection('topics');
   const User = await collection('users');
 
+  console.log('topics:', query);
   const topics = await Topic.find(query).sort({ _id: -1 }).limit(Number(limit)).toArray();
   for await (const topic of topics) {
     const user = await User.findOne({_id: topic.user_id});
@@ -22,11 +23,20 @@ async function GET(req: Request) {
   const searchParams = req.nextUrl.searchParams;
   console.log('GET /api/topics:', searchParams);
   const limit = searchParams.get('limit');
-  const parent_id = searchParams.get('parent_id');
-  // console.log({parent_id});
-  const query = {
-    parent_id: parent_id ? new ObjectId(parent_id) : null,
-  };
+  // const parent_id = searchParams.get('parent_id');
+  // const query = {
+  //   parent_id: parent_id ? new ObjectId(parent_id) : null,
+  // };
+  const q = searchParams.get('q');
+  console.log('q:', q);
+  const query = {};
+  q.split(/\s+/).forEach((label) => {
+    const [k, v] = label.split(':');
+    console.log('label:', label, {k, v});
+    if (v) {
+      query['labels'] = { k, v };
+    }
+  })
   return NextResponse.json(await topics(query, limit));
 }
 
