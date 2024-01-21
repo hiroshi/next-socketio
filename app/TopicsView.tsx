@@ -50,8 +50,7 @@ function Filter({ setQuery }) {
         setFilterString(`${k}:`);
       }
     } else {
-      setFilterString('');
-      setQuery('');
+      setQuery(filterString);
     }
     inputRef.current.focus();
   };
