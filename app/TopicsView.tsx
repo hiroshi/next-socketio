@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useContext, createContext } from 'react';
 import classNames from 'classnames';
 
-const ViewContext = createContext({
+const TopicsViewContext = createContext({
   updateView: () => {},
   setSelectedTopicId: () => {},
 });
@@ -98,7 +98,7 @@ function NewTopic({ setUpdate } : NewTopicProps) {
 function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
   const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
   const [labelsString, setLabelsString] = useState(initialLabelsString);
-  const { updateView, setSelectedTopicId } = useContext(ViewContext);
+  const { updateView, setSelectedTopicId } = useContext(TopicsViewContext);
 
   const handleChangeLabels = (e) => {
     setLabelsString(e.target.value);
@@ -186,7 +186,7 @@ export default function TopicsView() {
 
   const filterProps = { setQuery };
   return (
-    <ViewContext.Provider value={context}>
+    <TopicsViewContext.Provider value={context}>
       <Filter {...filterProps}/>
       <ul ref={listRef}>
         <li>
@@ -194,6 +194,6 @@ export default function TopicsView() {
         </li>
         { items }
       </ul>
-    </ViewContext.Provider>
+    </TopicsViewContext.Provider>
   );
 }
