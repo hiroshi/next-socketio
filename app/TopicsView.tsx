@@ -39,13 +39,19 @@ function Filter({ setQuery }) {
     event.preventDefault();
     console.log('submit:', focusLabel);
     // setFilterString(focusLabel + ':');
-    const {k, v} = focusLabel;
-    if (v !== undefined) {
-      const filterString = `${k}:${v}`;
-      setFilterString(filterString);
-      setQuery(filterString);
+    if (focusLabel) {
+      const {k, v} = focusLabel;
+      if (v !== undefined) {
+        const filterString = `${k}:${v}`;
+        setFilterString(filterString);
+        setQuery(filterString);
+        setFocusLabel(null);
+      } else {
+        setFilterString(`${k}:`);
+      }
     } else {
-      setFilterString(`${k}:`);
+      setFilterString('');
+      setQuery('');
     }
     inputRef.current.focus();
   };
