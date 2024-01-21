@@ -69,13 +69,10 @@ function Filter({ setQuery }) {
   );
 }
 
-type NewTopicProps = {
-  setUpdate: (v: any) => void,
-};
-
-function NewTopic({ setUpdate } : NewTopicProps) {
+function NewTopic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
+  const { updateView } = useContext(TopicsViewContext);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,7 +82,7 @@ function NewTopic({ setUpdate } : NewTopicProps) {
       body: JSON.stringify({ message }),
     });
     (e.target as HTMLFormElement).reset();
-    setUpdate(new Date());
+    updateView();
   };
 
   return (
@@ -177,8 +174,6 @@ export default function TopicsView() {
     return (<li key={topic._id} onClick={()=>setSelectedTopicId(topic._id)}><TopicItem {...props} /></li>);
   });
 
-  const newTopicsProps: NewTopicProps = { setUpdate };
-
   const context = {
     updateView: () => setUpdate(new Date()),
     setSelectedTopicId,
@@ -190,7 +185,7 @@ export default function TopicsView() {
       <Filter {...filterProps}/>
       <ul ref={listRef}>
         <li>
-          <NewTopic {...newTopicsProps} />
+          <NewTopic />
         </li>
         { items }
       </ul>
