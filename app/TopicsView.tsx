@@ -6,11 +6,14 @@ import classNames from 'classnames';
 const TopicsViewContext = createContext({
   updateView: () => {},
   setSelectedTopicId: () => {},
+  labels: [],
+  setLabels: () => {},
 });
 
 function Filter({ setQuery }) {
   const [filterString, setFilterString] = useState('');
-  const [labels, setLabels] = useState([]);
+  // const [labels, setLabels] = useState([]);
+  const {labels, setLabels} = useContext(TopicsViewContext);
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
 
@@ -71,14 +74,14 @@ function Filter({ setQuery }) {
 function NewTopic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
-  const { updateView } = useContext(TopicsViewContext);
+  const { labels, updateView } = useContext(TopicsViewContext);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const message = inputRef?.current?.value;
     await fetch('/api/topics', {
       method: 'POST',
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, labels }),
     });
     (e.target as HTMLFormElement).reset();
     updateView();
@@ -143,6 +146,7 @@ export default function TopicsView() {
   const [topics, setTopics] = useState([]);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [query, setQuery] = useState('');
+  const [labels, setLabels] = useState([]);
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -176,6 +180,8 @@ export default function TopicsView() {
   const context = {
     updateView: () => setUpdate(new Date()),
     setSelectedTopicId,
+    labels,
+    setLabels,
   }
 
   const filterProps = { setQuery };

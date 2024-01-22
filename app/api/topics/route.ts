@@ -60,7 +60,7 @@ async function POST(req: Request) {
     const uid = session?.user?.id;
     const user = await User.findOne({ uid });
     const user_id = user?._id;
-    const doc = { message, user_id };
+    const doc = { message, user_id, labels };
     if (parent_id) {
       doc.parent_id = new ObjectId(parent_id);
     }
