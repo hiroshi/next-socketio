@@ -20,9 +20,14 @@ const TopicsViewContext = createContext({
 function SaveFilter() {
   const { queryString } = useContext(TopicsViewContext);
 
-  const handleSubmit = (event) => {
-    console.log('saveFilter:', queryString);
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('saveFilter:', queryString);
+    const labels = queryToLabels(queryString);
+    await fetch('/api/filters', {
+      method: 'POST',
+      body: JSON.stringify({ labels }),
+    })
   };
 
   return (

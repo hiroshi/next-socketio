@@ -1,8 +1,13 @@
 // import Topics from './Topics';
+import FilterTabsView from './FilterTabsView';
 import TopicsView from './TopicsView';
 
 export default function Page() {
   return (
-    <TopicsView />
+    <>
+      <FilterTabsView />
+      <hr/>
+      <TopicsView />
+    </>
   );
 }
