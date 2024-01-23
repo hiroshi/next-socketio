@@ -6,14 +6,31 @@ import classNames from 'classnames';
 const TopicsViewContext = createContext({
   updateView: () => {},
   setSelectedTopicId: () => {},
-  labels: [],
-  setLabels: () => {},
+  queryString: "",
+  setQueryString: () => {},
 });
 
-function Filter({ setQuery }) {
+function SaveFilter() {
+  const { queryString } = useContext(TopicsViewContext);
+
+  const handleSubmit = (event) => {
+    console.log('saveFilter:', queryString);
+    event.preventDefault();
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <button>save</button>
+    </form>
+  );
+}
+
+
+
+function Filter() {
   const [filterString, setFilterString] = useState('');
-  // const [labels, setLabels] = useState([]);
-  const {labels, setLabels} = useContext(TopicsViewContext);
+  const [labels, setLabels] = useState([]);
+  const { setQueryString } = useContext(TopicsViewContext);
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
 
@@ -47,13 +64,13 @@ function Filter({ setQuery }) {
       if (v !== undefined) {
         const filterString = `${k}:${v}`;
         setFilterString(filterString);
-        setQuery(filterString);
+        setQueryString(filterString);
         setFocusLabel(null);
       } else {
         setFilterString(`${k}:`);
       }
     } else {
-      setQuery(filterString);
+      setQueryString(filterString);
     }
     inputRef.current.focus();
   };
@@ -64,10 +81,13 @@ function Filter({ setQuery }) {
   });
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input ref={inputRef} type='text' value={filterString} onChange={handleChange} />
-      { options }
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <input ref={inputRef} type='text' value={filterString} onChange={handleChange} />
+        { options }
+      </form>
+      <SaveFilter />
+    </>
   );
 }
 
@@ -145,15 +165,15 @@ export default function TopicsView() {
   const [update, setUpdate] = useState(new Date());
   const [topics, setTopics] = useState([]);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
-  const [query, setQuery] = useState('');
+  const [queryString, setQueryString] = useState('');
   const [labels, setLabels] = useState([]);
   const listRef = useRef(null);
 
   useEffect(() => {
-    fetch(`/api/topics?limit=3&q=${query}`).then(r => r.json()).then(topics => {
+    fetch(`/api/topics?limit=3&q=${queryString}`).then(r => r.json()).then(topics => {
       setTopics(topics);
     });
-  }, [update, query]);
+  }, [update, queryString]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -182,12 +202,13 @@ export default function TopicsView() {
     setSelectedTopicId,
     labels,
     setLabels,
+    queryString,
+    setQueryString,
   }
 
-  const filterProps = { setQuery };
   return (
     <TopicsViewContext.Provider value={context}>
-      <Filter {...filterProps}/>
+      <Filter />
       <ul ref={listRef}>
         <li>
           <NewTopic />
