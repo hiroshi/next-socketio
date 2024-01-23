@@ -3,6 +3,13 @@
 import { useEffect, useState, useRef, useContext, createContext } from 'react';
 import classNames from 'classnames';
 
+function queryToLabels(queryString) {
+  return queryString.split(/\s+/).map((pair) => {
+    const [k, v] = pair.split(':');
+    return {k, v};
+  });
+}
+
 const TopicsViewContext = createContext({
   updateView: () => {},
   setSelectedTopicId: () => {},
@@ -94,11 +101,13 @@ function Filter() {
 function NewTopic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
-  const { labels, updateView } = useContext(TopicsViewContext);
+  const { queryString, updateView } = useContext(TopicsViewContext);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const message = inputRef?.current?.value;
+    const labels = queryToLabels(queryString);
+
     await fetch('/api/topics', {
       method: 'POST',
       body: JSON.stringify({ message, labels }),
