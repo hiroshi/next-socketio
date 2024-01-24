@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import { collection } from '../../../lib/mongo';
 
 async function GET(req: Request) {
+  console.log('GET /api/filters');
   const Filter = await collection('filters');
   const filters = await Filter.find().toArray();
-  console.log('filters:', filters);
+  // console.log('filters:', filters);
 
   return NextResponse.json(filters);
 }

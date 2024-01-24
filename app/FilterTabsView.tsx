@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-
+import Link from 'next/link';
+import { labelsToQuery } from './label';
 
 export default function FilterTabsView() {
   const [filters, setFilters] = useState([]);
@@ -15,15 +16,18 @@ export default function FilterTabsView() {
   return (
     <>
       {
-        filters.map(({labels}) => (
-            <p key={labels}>
+        filters.map(({labels}) => {
+          const q = labelsToQuery(labels);
+          return (
+            <Link key={labels} href={`/?q=${q}`}>
               {
                 labels.map((l, n) => (
                   <span key={n}>{l.k}:{l.v}</span>
                 ))
               }
-            </p>
-        ))
+            </Link>
+          )
+        })
       }
     </>
   );

@@ -1,14 +1,10 @@
 'use client'
 
 import { useEffect, useState, useRef, useContext, createContext } from 'react';
+// import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import classNames from 'classnames';
-
-function queryToLabels(queryString) {
-  return queryString.split(/\s+/).map((pair) => {
-    const [k, v] = pair.split(':');
-    return {k, v};
-  });
-}
+import { queryToLabels } from './label';
 
 const TopicsViewContext = createContext({
   updateView: () => {},
@@ -37,14 +33,22 @@ function SaveFilter() {
   );
 }
 
-
-
 function Filter() {
   const [filterString, setFilterString] = useState('');
+  console.log('filterString:', filterString);
   const [labels, setLabels] = useState([]);
   const { setQueryString } = useContext(TopicsViewContext);
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
+
+  const searchParams = useSearchParams();
+  // const router = useRouter();
+  const q = searchParams.get('q') || '';
+  // console.log('searchParams.q:', searchParams.get('q'));
+  useEffect(() => {
+    setFilterString(q);
+    setQueryString(q);
+  }, [q]);
 
   useEffect(() => {
     fetch(`/api/labels?q=${filterString}`).then(r => r.json()).then((results) => {
