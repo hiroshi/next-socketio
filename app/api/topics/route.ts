@@ -7,7 +7,7 @@ async function topics(query, limit) {
   const Topic = await collection('topics');
   const User = await collection('users');
 
-  // console.log('topics:', query);
+  console.log('topics:', JSON.stringify(query));
   const topics = await Topic.find(query).sort({ _id: -1 }).limit(Number(limit)).toArray();
   for await (const topic of topics) {
     const user = await User.findOne({_id: topic.user_id});
@@ -29,14 +29,19 @@ async function GET(req: Request) {
   // };
   const q = searchParams.get('q');
   // console.log('q:', q);
-  const query = {};
+  // const query = {};
+  const ands = [];
   q.split(/\s+/).forEach((label) => {
     const [k, v] = label.split(':');
     // console.log('label:', label, {k, v});
     if (v) {
-      query['labels'] = { k, v };
+      ands.push({labels: { k, v }})
     }
   })
+  const query = {};
+  if (ands.length > 0) {
+    query['$and'] = ands;
+  }
   return NextResponse.json(await topics(query, limit));
 }
 

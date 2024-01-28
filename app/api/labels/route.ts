@@ -6,7 +6,7 @@ async function GET(req: Request) {
   const searchParams = req.nextUrl.searchParams;
   console.log('GET /api/labels:', searchParams);
   const q = searchParams.get('q');
-  const [k, v] = q.split(':');
+  const [k, v] = q.split(/\s+/).pop().split(':');
 
   const Topic = await collection('topics');
 

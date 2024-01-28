@@ -51,7 +51,9 @@ function Filter() {
   }, [q]);
 
   useEffect(() => {
-    fetch(`/api/labels?q=${filterString}`).then(r => r.json()).then((results) => {
+    // const url = `/api/labels?q=${filterString}`;
+    const url = "/api/labels?q=" + encodeURIComponent(filterString);
+    fetch(url).then(r => r.json()).then((results) => {
       console.log('results:', results);
       setLabels(results);
     });
@@ -77,13 +79,18 @@ function Filter() {
     // setFilterString(focusLabel + ':');
     if (focusLabel) {
       const {k, v} = focusLabel;
+      const labelStrings = filterString.split(/\s+/);
+      labelStrings.pop();
       if (v !== undefined) {
-        const filterString = `${k}:${v}`;
-        setFilterString(filterString);
-        setQueryString(filterString);
-        setFocusLabel(null);
+        labelStrings.push(`${k}:${v}`);
       } else {
-        setFilterString(`${k}:`);
+        labelStrings.push(`${k}:`);
+      }
+      const value = labelStrings.join(' ')
+      setFilterString(value);
+      if (v !== undefined) {
+        setQueryString(value);
+        setFocusLabel(null);
       }
     } else {
       setQueryString(filterString);
@@ -99,7 +106,7 @@ function Filter() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <input ref={inputRef} type='text' value={filterString} onChange={handleChange} />
+        <input ref={inputRef} type='text' size="30" value={filterString} onChange={handleChange} />
         { options }
       </form>
       <SaveFilter />
