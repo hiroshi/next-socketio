@@ -31,11 +31,16 @@ async function GET(req: Request) {
   // console.log('q:', q);
   // const query = {};
   const ands = [];
-  q.split(/\s+/).forEach((label) => {
+  q.split(/\s+/).forEach((l) => {
+    const neg = l[0] === "-";
+    const label = neg ? l.slice(1) : l;
     const [k, v] = label.split(':');
-    // console.log('label:', label, {k, v});
     if (v) {
-      ands.push({labels: { k, v }})
+      if (neg) {
+        ands.push({labels: {$not: {$elemMatch: {k, v}}}})
+      } else {
+        ands.push({labels: { k, v }})
+      }
     }
   })
   const query = {};
