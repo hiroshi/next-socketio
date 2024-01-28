@@ -62,3 +62,7 @@ span form {
   padding: 0 0.2em;
   margin-left: 0.5em;
 }
+/*FilterTabsView*/
+.filter-tab {
+  margin: 0.5em;
+}
