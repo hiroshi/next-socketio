@@ -9,15 +9,21 @@ async function GET(req: Request) {
   const [k, v] = q.split(':');
 
   const Topic = await collection('topics');
-  const match = (v !== undefined)
-    ? {"labels.k": k, "labels.v": {$regex: `^${v}`}}
-    : {"labels.k": {$regex: `^${k}`}};
-  const labels = await Topic.aggregate([
-    { $unwind: "$labels" },
-    { $match: match },
-    { $group: { _id: "$labels" } },
-    { $project: { _id: 1 } }
-  ]).toArray().then(results => results.map(l => l._id));
+
+  let labels;
+  if (v !== undefined) {
+    labels = await Topic.aggregate([
+      { $unwind: "$labels" },
+      { $match: {"labels.k": k, "labels.v": {$regex: `^${v}`}}},
+      { $group: { _id: "$labels" } },
+    ]).toArray().then(results => results.map(l => l._id));
+  } else {
+    labels = await Topic.aggregate([
+      { $unwind: "$labels" },
+      { $match: {"labels.k": {$regex: `^${k}`}} },
+      { $group: { _id: "$labels.k" } },
+    ]).toArray().then(results => results.map(l => { return {k: l._id}}));
+  }
   console.log('=>', labels);
   return NextResponse.json(labels);
 }
