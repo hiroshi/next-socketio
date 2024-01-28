@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { labelsToQuery } from './label';
+import { labelsToQuery } from '../lib/label';
 
 export default function FilterTabsView() {
   const [filters, setFilters] = useState([]);

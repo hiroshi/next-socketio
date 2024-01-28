@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useContext, createContext } from 'react';
 // import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import classNames from 'classnames';
-import { queryToLabels } from './label';
+import { queryToLabels } from '../lib/label';
 
 const TopicsViewContext = createContext({
   updateView: () => {},
