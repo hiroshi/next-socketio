@@ -16,10 +16,10 @@ export default function FilterTabsView() {
   return (
     <>
       {
-        filters.map(({labels}) => {
+        filters.map(({labels}, n) => {
           const q = labelsToQuery(labels);
           return (
-            <span className='filter-tab'>
+            <span className='filter-tab' key={n}>
               <Link key={labels} href={`/?q=${q}`}>
                 {
                   labels.map((l, n) => (
