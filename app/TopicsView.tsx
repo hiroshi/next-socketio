@@ -122,7 +122,7 @@ function NewTopic() {
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const message = inputRef?.current?.value;
-    const labels = queryToLabels(queryString);
+    const labels = queryToLabels(queryString, {ignoreNegative: true});
 
     await fetch('/api/topics', {
       method: 'POST',

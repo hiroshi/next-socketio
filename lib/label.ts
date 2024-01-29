@@ -1,10 +1,16 @@
-function queryToLabels(queryString) {
-  return queryString.split(/\s+/).map((l) => {
+type queryToLabelsOptions = {
+  ignoreNegative: bool,
+};
+
+function queryToLabels(queryString, options: queryToLabelsOptions = {}) {
+  const labels = queryString.split(/\s+/).map((l) => {
     const n = l[0] === '-';
     const label = n ? l.slice(1) : l;
     const [k, v] = label.split(':');
     return n ? {k, v, n} : {k, v};
   });
+
+  return options.ignoreNegative ? labels.filter(l => !l.n) : labels;
 }
 
 function labelsToQuery(labels) {
