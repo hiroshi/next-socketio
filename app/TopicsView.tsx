@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import classNames from 'classnames';
 import { queryToLabels } from '../lib/label';
 
-const TopicsViewContext = createContext({
+export const TopicsViewContext = createContext({
   updateView: () => {},
   setSelectedTopicId: () => {},
   queryString: "",
@@ -140,7 +140,7 @@ function NewTopic() {
   );
 }
 
-function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: bool, setUpdate: (v: any) => void }) {
+export function TopicItem({ topic, selected }: { topic: Topic, selected: bool }) {
   const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
   const [labelsString, setLabelsString] = useState(initialLabelsString);
   const { updateView, setSelectedTopicId } = useContext(TopicsViewContext);
@@ -229,9 +229,12 @@ export default function TopicsView() {
     const props = {
       topic: topic,
       selected: selectedTopicId === topic._id,
-      setUpdate,
     }
-    return (<li key={topic._id} onClick={()=>setSelectedTopicId(topic._id)}><TopicItem {...props} /></li>);
+    return (
+      <li key={topic._id} onClick={()=>setSelectedTopicId(topic._id)}>
+        <TopicItem {...props} />
+      </li>
+    );
   });
 
   const context = {

@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useSession } from "next-auth/react";
+import { useEffect, useState, useRef } from 'react';
+import { useSession } from 'next-auth/react';
+import { TopicItem, TopicsViewContext } from './TopicsView';
 
 export default function AssignedTopicsView() {
-  const [ topics, setTopics ] = useState([]);
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const [topics, setTopics] = useState([]);
+  const listRef = useRef(null);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -17,15 +20,41 @@ export default function AssignedTopicsView() {
     }
   }, [session]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (listRef.current && !listRef.current.contains(event.target)) {
+        setSelectedTopicId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+  const context = {
+    updateView: () => {},
+    setSelectedTopicId,
+  }
+
   const items = topics.map(topic => {
+    const props = {
+      topic: topic,
+      selected: selectedTopicId === topic._id,
+    }
     return (
-      <li key={topic._id}>
-        { topic.message }
+      <li key={topic._id} onClick={()=>setSelectedTopicId(topic._id)}>
+        <TopicItem {...props} />
       </li>
     );
   });
 
   return (
-    <ul>{ items }</ul>
+    <TopicsViewContext.Provider value={context}>
+      <ul ref={listRef}>
+        { items }
+      </ul>
+    </TopicsViewContext.Provider>
   );
 }
