@@ -27,26 +27,34 @@ async function GET(req: Request) {
   // const query = {
   //   parent_id: parent_id ? new ObjectId(parent_id) : null,
   // };
-  const q = searchParams.get('q');
-  // console.log('q:', q);
-  // const query = {};
-  const ands = [];
-  q.split(/\s+/).forEach((l) => {
-    const neg = l[0] === "-";
-    const label = neg ? l.slice(1) : l;
-    const [k, v] = label.split(':');
-    if (v) {
-      if (neg) {
-        ands.push({labels: {$not: {$elemMatch: {k, v}}}})
-      } else {
-        ands.push({labels: { k, v }})
-      }
-    }
-  })
+
   const query = {};
-  if (ands.length > 0) {
-    query['$and'] = ands;
+  // labels query
+  const q = searchParams.get('q');
+  const ands = [];
+  if (q) {
+    q.split(/\s+/).forEach((l) => {
+      const neg = l[0] === "-";
+      const label = neg ? l.slice(1) : l;
+      const [k, v] = label.split(':');
+      if (v) {
+        if (neg) {
+          ands.push({labels: {$not: {$elemMatch: {k, v}}}})
+        } else {
+          ands.push({labels: { k, v }})
+        }
+      }
+    })
+    if (ands.length > 0) {
+      query['$and'] = ands;
+    }
   }
+  // asignee
+  const asignee = searchParams.get('assignee');
+  if (asignee) {
+    query['assignee'] = new ObjectId(asignee);
+  }
+
   return NextResponse.json(await topics(query, limit));
 }
 
@@ -56,13 +64,18 @@ import authOptions from "../auth/[...nextauth]/authOptions";
 async function POST(req: Request) {
   const params = await req.json();
   console.log('POST /api/topics:', params);
-  const { _id, message, parent_id, labels } = params;
+  const { _id, message, parent_id, labels, assignee } = params;
   const Topic = await collection('topics');
   const User = await collection('users');
 
   if (_id) {
-    // await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { parent_id: new ObjectId(parent_id) } });
-    await Topic.updateOne({_id: new ObjectId(_id)}, { $set: { labels: labels } });
+    // FIXME: validate/sanitize doc
+    const { _id, ...doc } = params;
+    if (doc.assignee) {
+      doc.assignee = new ObjectId(doc.assignee);
+    }
+    console.log('$set:', doc);
+    await Topic.updateOne({_id: new ObjectId(_id)}, { $set: doc });
     return new Response(null, { status: 204 });
   } else {
     const session = await getServerSession(authOptions) as any;;

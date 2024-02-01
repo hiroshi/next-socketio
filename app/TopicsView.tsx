@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useContext, createContext } from 'react';
 // import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from "next-auth/react";
 import classNames from 'classnames';
 import { queryToLabels } from '../lib/label';
 
@@ -143,6 +144,8 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
   const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
   const [labelsString, setLabelsString] = useState(initialLabelsString);
   const { updateView, setSelectedTopicId } = useContext(TopicsViewContext);
+  const { data: session } = useSession();
+  const { _id } = topic;
 
   const handleChangeLabels = (e) => {
     setLabelsString(e.target.value);
@@ -152,13 +155,21 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
     e.preventDefault();
     await fetch('/api/topics', {
       method: 'POST',
-      body: JSON.stringify({ _id: topic._id, labels }),
+      body: JSON.stringify({ _id, labels }),
     });
     console.log(labels);
     // (e.target as HTMLFormElement).reset();
     // setUpdate(new Date());
     updateView();
     setSelectedTopicId(null);
+  };
+
+  const handleClickAssign = async (e) => {
+    console.log('session.user:', session.user);
+    await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({ _id, assignee: session.user._id }),
+    });
   };
 
   const labels = [];
@@ -180,6 +191,7 @@ function TopicItem({ topic, selected, setUpdate }: { topic: Topic, selected: boo
           <form onSubmit={handleSubmitLabels} className='topic-labels-form'>
             <input type='text' value={labelsString} onChange={handleChangeLabels} />
           </form>
+          <button onClick={handleClickAssign}>assign</button>
         </span>
       }
     </div>

@@ -30,7 +30,12 @@ const authOptions: AuthOptions = {
       //   session.user.id = token.sub;
       // }
       // return session;
-      return { ...session, user: { ...session.user, id: token.sub }};
+      const uid = token.sub
+      const User = await collection('users');
+      const userDoc = await User.findOne({ uid })
+      const _id = userDoc._id;
+
+      return { ...session, user: { ...session.user, uid, _id }};
     },
   }
 };
