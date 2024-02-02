@@ -165,11 +165,12 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
   };
 
   const handleClickAssign = async (e) => {
-    console.log('session.user:', session.user);
+    const assignee = topic.assignee ? null : session.user._id;
     await fetch('/api/topics', {
       method: 'POST',
-      body: JSON.stringify({ _id, assignee: session.user._id }),
+      body: JSON.stringify({ _id, assignee }),
     });
+    updateView();
   };
 
   const labels = [];
@@ -179,6 +180,8 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
       labels.push({k,v});
     }
   });
+
+  const assignButtonText = topic.assignee ? 'unassign' : 'assign'
 
   return (
     <div className={classNames({'topic-item': true, 'topic-selected': selected})}>
@@ -191,7 +194,7 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
           <form onSubmit={handleSubmitLabels} className='topic-labels-form'>
             <input type='text' value={labelsString} onChange={handleChangeLabels} />
           </form>
-          <button onClick={handleClickAssign}>assign</button>
+          <button onClick={handleClickAssign}>{ assignButtonText }</button>
         </span>
       }
     </div>
