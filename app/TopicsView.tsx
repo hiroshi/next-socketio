@@ -34,7 +34,7 @@ function SaveFilter() {
   );
 }
 
-function Filter() {
+function FilterInput() {
   const [filterString, setFilterString] = useState('');
   console.log('filterString:', filterString);
   const [labels, setLabels] = useState([]);
@@ -115,15 +115,23 @@ function Filter() {
   );
 }
 
+function TopicLabels({labels}) {
+  return (
+    <>
+      {labels.map((o, i) => <span key={i} className='topic-label'>{`${o.k}:${o.v}`}</span>)}
+    </>
+  );
+}
+
 function NewTopic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const { queryString, updateView } = useContext(TopicsViewContext);
+  const labels = queryToLabels(queryString, {ignoreNegative: true});
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const message = inputRef?.current?.value;
-    const labels = queryToLabels(queryString, {ignoreNegative: true});
 
     await fetch('/api/topics', {
       method: 'POST',
@@ -136,6 +144,7 @@ function NewTopic() {
   return (
     <form onSubmit={handleSubmit}>
       <input type="text" ref={inputRef} />
+      <TopicLabels {...{labels}} />
     </form>
   );
 }
@@ -186,9 +195,7 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
   return (
     <div className={classNames({'topic-item': true, 'topic-selected': selected})}>
       {topic.message}
-      {
-        labels.map((o, i) => <span key={i} className='topic-label'>{`${o.k}:${o.v}`}</span>)
-      }
+      <TopicLabels {...{labels}} />
       { selected &&
         <span>
           <form onSubmit={handleSubmitLabels} className='topic-labels-form'>
@@ -251,7 +258,7 @@ export default function TopicsView() {
 
   return (
     <TopicsViewContext.Provider value={context}>
-      <Filter />
+      <FilterInput />
       <ul ref={listRef}>
         <li>
           <NewTopic />
