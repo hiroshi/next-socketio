@@ -36,7 +36,7 @@ function SaveFilter() {
 
 function FilterInput() {
   const [filterString, setFilterString] = useState('');
-  console.log('filterString:', filterString);
+  // console.log('filterString:', filterString);
   const [labels, setLabels] = useState([]);
   const { setQueryString } = useContext(TopicsViewContext);
   const [focusLabel, setFocusLabel] = useState(null);
@@ -76,7 +76,7 @@ function FilterInput() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('submit:', focusLabel);
+    console.log('submit:', { focusLabel, filterString });
     // setFilterString(focusLabel + ':');
     if (focusLabel) {
       const {k, v} = focusLabel;

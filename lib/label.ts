@@ -8,7 +8,7 @@ function queryToLabels(queryString, options: queryToLabelsOptions = {}) {
     const label = n ? l.slice(1) : l;
     const [k, v] = label.split(':');
     return n ? {k, v, n} : {k, v};
-  });
+  }).filter(l => l.k && l.v);
 
   return options.ignoreNegative ? labels.filter(l => !l.n) : labels;
 }
