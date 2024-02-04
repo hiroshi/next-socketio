@@ -22,7 +22,7 @@ export default function FilterTabsView() {
             <span className='filter-tab' key={n}>
               <Link key={labels} href={`/?q=${q}`}>
                 {
-                  labels.map(l => `${l.k}:${l.v}`).join(" ")
+                  labels.map(l => `${l.n ? '-': ''}${l.k}:${l.v}`).join(" ")
                 }
               </Link>
             </span>
