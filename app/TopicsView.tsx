@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useContext, createContext } from 'react';
-// import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import classNames from 'classnames';
 import { queryToLabels } from '../lib/label';
@@ -215,8 +214,10 @@ export default function TopicsView() {
   const [queryString, setQueryString] = useState('');
   const [labels, setLabels] = useState([]);
   const listRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
+    router.push(`/?q=${queryString}`);
     fetch(`/api/topics?limit=3&q=${queryString}`).then(r => r.json()).then(topics => {
       setTopics(topics);
     });
