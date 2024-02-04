@@ -8,14 +8,15 @@ async function topics(query, limit) {
   const User = await collection('users');
 
   console.log('topics:', JSON.stringify(query));
-  const topics = await Topic.find(query).sort({ _id: -1 }).limit(Number(limit)).toArray();
-  for await (const topic of topics) {
+  const total = await Topic.countDocuments(query);
+  const items = await Topic.find(query).sort({ _id: -1 }).limit(Number(limit)).toArray();
+  for await (const topic of items) {
     const user = await User.findOne({_id: topic.user_id});
     if (user) {
       topic.user = user;
     }
   }
-  return topics;
+  return { items, total };
 }
 
 async function GET(req: Request) {

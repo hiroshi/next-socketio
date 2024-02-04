@@ -6,7 +6,7 @@ import { TopicItem, TopicsViewContext } from './TopicsView';
 
 export default function AssignedTopicsView() {
   const [selectedTopicId, setSelectedTopicId] = useState(null);
-  const [topics, setTopics] = useState([]);
+  const [topics, setTopics] = useState({items:[], total:0});
   const listRef = useRef(null);
   const { data: session } = useSession();
 
@@ -38,7 +38,7 @@ export default function AssignedTopicsView() {
     setSelectedTopicId,
   }
 
-  const items = topics.map(topic => {
+  const items = topics.items.map(topic => {
     const props = {
       topic: topic,
       selected: selectedTopicId === topic._id,

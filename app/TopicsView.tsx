@@ -209,7 +209,7 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
 
 export default function TopicsView() {
   const [update, setUpdate] = useState(new Date());
-  const [topics, setTopics] = useState([]);
+  const [topics, setTopics] = useState({items:[], total:0});
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [queryString, setQueryString] = useState('');
   const [labels, setLabels] = useState([]);
@@ -236,7 +236,7 @@ export default function TopicsView() {
     };
   }, []);
 
-  const items = topics.map((topic: Topic) => {
+  const items = topics.items.map((topic: Topic) => {
     const props = {
       topic: topic,
       selected: selectedTopicId === topic._id,
@@ -266,6 +266,7 @@ export default function TopicsView() {
         </li>
         { items }
       </ul>
+    <p>total: {topics.total}</p>
     </TopicsViewContext.Provider>
   );
 }
