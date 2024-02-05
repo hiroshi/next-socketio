@@ -3,7 +3,7 @@ type queryToLabelsOptions = {
 };
 
 function queryToLabels(queryString, options: queryToLabelsOptions = {}) {
-  const labels = queryString.split(/\s+/).map((l) => {
+  const labels = (queryString || "").split(/\s+/).map((l) => {
     const n = l[0] === '-';
     const label = n ? l.slice(1) : l;
     const [k, v] = label.split(':');

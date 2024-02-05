@@ -13,9 +13,9 @@ export const TopicsViewContext = createContext({
   setQueryString: () => {},
 });
 
-function LabelsInput({initialLabelsString, updateLabelsString}) {
+function LabelsInput({initialLabelsString, updateLabelsString, initialOptionLabels}) {
   const [labelsString, setLabelsString] = useState(initialLabelsString);
-  const [labels, setLabels] = useState([]);
+  const [labels, setLabels] = useState(initialOptionLabels || []);
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
 
@@ -24,10 +24,12 @@ function LabelsInput({initialLabelsString, updateLabelsString}) {
   }, [initialLabelsString]);
 
   useEffect(() => {
-    const url = "/api/labels?q=" + encodeURIComponent(labelsString);
-    fetch(url).then(r => r.json()).then((results) => {
-      setLabels(results);
-    });
+    if (initialLabelsString !== labelsString) {
+      const url = "/api/labels?q=" + encodeURIComponent(labelsString);
+      fetch(url).then(r => r.json()).then((results) => {
+        setLabels(results);
+      });
+    }
   }, [labelsString]);
 
   const handleSubmit = (event) => {
@@ -36,22 +38,19 @@ function LabelsInput({initialLabelsString, updateLabelsString}) {
     if (focusLabel) {
       const {k, v} = focusLabel;
       const labelStrings = labelsString.split(/\s+/);
-      labelStrings.pop();
-      if (v !== undefined) {
-        labelStrings.push(`${k}:${v}`);
-      } else {
-        labelStrings.push(`${k}:`);
+      const focusLabelString = (v !== undefined) ? `${k}:${v}` : `${k}:`;
+      if (focusLabelString.startsWith(labelStrings.slice(-1))) {
+        labelStrings.pop();
       }
+      labelStrings.push(focusLabelString);
       const value = labelStrings.join(' ')
       setLabelsString(value);
       if (v !== undefined) {
-        // setQueryString(value);
         updateLabelsString(value);
         setFocusLabel(null);
       }
     } else {
       updateLabelsString(labelsString);
-      // setQueryString(labelsString);
     }
     inputRef.current.focus();
   };
@@ -82,8 +81,6 @@ function LabelsInput({initialLabelsString, updateLabelsString}) {
     </>
   );
 }
-
-
 
 function SaveFilter() {
   const { queryString } = useContext(TopicsViewContext);
@@ -159,7 +156,7 @@ function NewTopic() {
 export function TopicItem({ topic, selected }: { topic: Topic, selected: bool }) {
   const initialLabelsString = topic.labels ? topic.labels.map((o) => `${o.k}:${o.v}`).join(' ') : '';
   const [labelsString, setLabelsString] = useState(initialLabelsString);
-  const { updateView, setSelectedTopicId } = useContext(TopicsViewContext);
+  const { updateView, setSelectedTopicId, queryString } = useContext(TopicsViewContext);
   const { data: session } = useSession();
   const { _id } = topic;
 
@@ -209,6 +206,7 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
   // });
   const labels = queryToLabels(labelsString);
   const assignButtonText = topic.assignee ? 'unassign' : 'assign'
+  const initialOptionLabels = queryToLabels(queryString).filter((l) => l.n);
 
   return (
     <div className={classNames({'topic-item': true, 'topic-selected': selected})}>
@@ -217,7 +215,7 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
       { selected &&
         <span>
           <button onClick={handleClickAssign}>{ assignButtonText }</button>
-          <LabelsInput {...{initialLabelsString, updateLabelsString}} />
+          <LabelsInput {...{initialLabelsString, updateLabelsString, initialOptionLabels}} />
         </span>
       }
     </div>
