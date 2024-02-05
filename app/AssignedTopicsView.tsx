@@ -14,7 +14,7 @@ export default function AssignedTopicsView() {
     if (session?.user) {
       const assignee = session.user._id;
       fetch(`/api/topics?assignee=${assignee}`).then(r => r.json()).then(topics => {
-        console.log("assigned topics:", topics);
+        // console.log("assigned topics:", topics);
         setTopics(topics);
       });
     }

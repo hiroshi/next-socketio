@@ -13,6 +13,78 @@ export const TopicsViewContext = createContext({
   setQueryString: () => {},
 });
 
+function LabelsInput({initialLabelsString, updateLabelsString}) {
+  const [labelsString, setLabelsString] = useState(initialLabelsString);
+  const [labels, setLabels] = useState([]);
+  const [focusLabel, setFocusLabel] = useState(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    setLabelsString(initialLabelsString);
+  }, [initialLabelsString]);
+
+  useEffect(() => {
+    const url = "/api/labels?q=" + encodeURIComponent(labelsString);
+    fetch(url).then(r => r.json()).then((results) => {
+      setLabels(results);
+    });
+  }, [labelsString]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log('submit:', { focusLabel, labelsString });
+    if (focusLabel) {
+      const {k, v} = focusLabel;
+      const labelStrings = labelsString.split(/\s+/);
+      labelStrings.pop();
+      if (v !== undefined) {
+        labelStrings.push(`${k}:${v}`);
+      } else {
+        labelStrings.push(`${k}:`);
+      }
+      const value = labelStrings.join(' ')
+      setLabelsString(value);
+      if (v !== undefined) {
+        // setQueryString(value);
+        updateLabelsString(value);
+        setFocusLabel(null);
+      }
+    } else {
+      updateLabelsString(labelsString);
+      // setQueryString(labelsString);
+    }
+    inputRef.current.focus();
+  };
+
+  const handleFocus = (event) => {
+    const value = event.target.value;
+    const [k, _v] = value.split(':');
+    const v = _v !== '' ? _v : undefined;
+    setFocusLabel({k, v});
+  };
+
+  const handleChange = async (event) => {
+    const value = event.target.value
+    setLabelsString(value);
+  };
+
+  const options = labels.map(({k, v}) => {
+    const label = v !== undefined ? `${k}:${v}` : `${k}:`
+    return (<button key={ label } value={ label } onFocus={handleFocus}>{ label }</button>);
+  });
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <input ref={inputRef} type='text' size="30" value={labelsString} onChange={handleChange} />
+        { options }
+      </form>
+    </>
+  );
+}
+
+
+
 function SaveFilter() {
   const { queryString } = useContext(TopicsViewContext);
 
@@ -34,76 +106,20 @@ function SaveFilter() {
 }
 
 function FilterInput() {
-  const [filterString, setFilterString] = useState('');
-  const [labels, setLabels] = useState([]);
   const { setQueryString } = useContext(TopicsViewContext);
-  const [focusLabel, setFocusLabel] = useState(null);
-  const inputRef = useRef(null);
-
   const searchParams = useSearchParams();
   const q = searchParams.get('q') || '';
+
   useEffect(() => {
-    setFilterString(q);
     setQueryString(q);
   }, [q]);
 
-  useEffect(() => {
-    const url = "/api/labels?q=" + encodeURIComponent(filterString);
-    fetch(url).then(r => r.json()).then((results) => {
-      setLabels(results);
-    });
-  }, [filterString]);
-
-  const handleChange = async (event) => {
-    const value = event.target.value
-    setFilterString(value);
-  };
-
-  const handleFocus = (event) => {
-    const value = event.target.value;
-    const [k, _v] = value.split(':');
-    const v = _v !== '' ? _v : undefined;
-    setFocusLabel({k, v});
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log('submit:', { focusLabel, filterString });
-    if (focusLabel) {
-      const {k, v} = focusLabel;
-      const labelStrings = filterString.split(/\s+/);
-      labelStrings.pop();
-      if (v !== undefined) {
-        labelStrings.push(`${k}:${v}`);
-      } else {
-        labelStrings.push(`${k}:`);
-      }
-      const value = labelStrings.join(' ')
-      setFilterString(value);
-      if (v !== undefined) {
-        setQueryString(value);
-        setFocusLabel(null);
-      }
-    } else {
-      setQueryString(filterString);
-    }
-    inputRef.current.focus();
-  };
-
-  const options = labels.map(({k, v}) => {
-    const label = v !== undefined ? `${k}:${v}` : `${k}:`
-    return (<button key={ label } value={ label } onFocus={handleFocus}>{ label }</button>);
-  });
-
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <input ref={inputRef} type='text' size="30" value={filterString} onChange={handleChange} />
-        { options }
-      </form>
+      <LabelsInput initialLabelsString={q} updateLabelsString={setQueryString} />
       <SaveFilter />
     </>
-  );
+  )
 }
 
 function TopicLabels({labels}) {
@@ -151,13 +167,24 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
     setLabelsString(e.target.value);
   };
 
+  const updateLabelsString = async (value) => {
+    console.log('updateLabelsString:', value);
+    const labels = queryToLabels(value);
+    await fetch('/api/topics', {
+      method: 'POST',
+      body: JSON.stringify({ _id, labels }),
+    });
+    updateView();
+    // setSelectedTopicId(null);
+  };
+
   const handleSubmitLabels = async (e) => {
     e.preventDefault();
     await fetch('/api/topics', {
       method: 'POST',
       body: JSON.stringify({ _id, labels }),
     });
-    console.log(labels);
+    // console.log(labels);
     // (e.target as HTMLFormElement).reset();
     // setUpdate(new Date());
     updateView();
@@ -173,14 +200,14 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
     updateView();
   };
 
-  const labels = [];
-  labelsString.split(/\s+/).forEach((pair) => {
-    const [k, v] = pair.split(':');
-    if (k && v) {
-      labels.push({k,v});
-    }
-  });
-
+  // const labels = [];
+  // labelsString.split(/\s+/).forEach((pair) => {
+  //   const [k, v] = pair.split(':');
+  //   if (k && v) {
+  //     labels.push({k,v});
+  //   }
+  // });
+  const labels = queryToLabels(labelsString);
   const assignButtonText = topic.assignee ? 'unassign' : 'assign'
 
   return (
@@ -189,10 +216,8 @@ export function TopicItem({ topic, selected }: { topic: Topic, selected: bool })
       <TopicLabels {...{labels}} />
       { selected &&
         <span>
-          <form onSubmit={handleSubmitLabels} className='topic-labels-form'>
-            <input type='text' value={labelsString} onChange={handleChangeLabels} />
-          </form>
           <button onClick={handleClickAssign}>{ assignButtonText }</button>
+          <LabelsInput {...{initialLabelsString, updateLabelsString}} />
         </span>
       }
     </div>
