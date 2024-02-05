@@ -35,26 +35,21 @@ function SaveFilter() {
 
 function FilterInput() {
   const [filterString, setFilterString] = useState('');
-  // console.log('filterString:', filterString);
   const [labels, setLabels] = useState([]);
   const { setQueryString } = useContext(TopicsViewContext);
   const [focusLabel, setFocusLabel] = useState(null);
   const inputRef = useRef(null);
 
   const searchParams = useSearchParams();
-  // const router = useRouter();
   const q = searchParams.get('q') || '';
-  // console.log('searchParams.q:', searchParams.get('q'));
   useEffect(() => {
     setFilterString(q);
     setQueryString(q);
   }, [q]);
 
   useEffect(() => {
-    // const url = `/api/labels?q=${filterString}`;
     const url = "/api/labels?q=" + encodeURIComponent(filterString);
     fetch(url).then(r => r.json()).then((results) => {
-      console.log('results:', results);
       setLabels(results);
     });
   }, [filterString]);
@@ -62,21 +57,18 @@ function FilterInput() {
   const handleChange = async (event) => {
     const value = event.target.value
     setFilterString(value);
-    // console.log(value);
   };
 
   const handleFocus = (event) => {
     const value = event.target.value;
     const [k, _v] = value.split(':');
     const v = _v !== '' ? _v : undefined;
-    // console.log('handleFocus:', [k, v !== '' ? v : null]);
     setFocusLabel({k, v});
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log('submit:', { focusLabel, filterString });
-    // setFilterString(focusLabel + ':');
     if (focusLabel) {
       const {k, v} = focusLabel;
       const labelStrings = filterString.split(/\s+/);
